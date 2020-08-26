@@ -12,6 +12,7 @@ import mozilla.components.feature.pwa.ManifestStorage
 import mozilla.components.feature.pwa.intent.WebAppIntentProcessor
 import mozilla.components.feature.search.SearchUseCases
 import mozilla.components.feature.session.SessionUseCases
+import mozilla.components.support.base.log.sink.StorageLogSink
 
 /**
  * Component group for miscellaneous components.
@@ -41,4 +42,9 @@ class Utilities(
         externalIntentProcessors +
             TabIntentProcessor(sessionManager, sessionUseCases.loadUrl, searchUseCases.newTabSearch)
     }
+
+    /**
+     * Provides log storage, allowing us to view and export logs from the app.
+     */
+    val logStorage by lazy { StorageLogSink(context) }
 }

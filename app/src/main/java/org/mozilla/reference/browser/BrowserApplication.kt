@@ -5,17 +5,20 @@
 package org.mozilla.reference.browser
 
 import android.app.Application
+import android.content.Context
 import mozilla.components.browser.session.Session
 import mozilla.components.concept.push.PushProcessor
 import mozilla.components.feature.addons.update.GlobalAddonDependencyProvider
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.base.log.sink.AndroidLogSink
+import mozilla.components.support.base.log.sink.StorageLogSink
 import mozilla.components.support.ktx.android.content.isMainProcess
 import mozilla.components.support.ktx.android.content.runOnlyInMainProcess
 import mozilla.components.support.rusthttp.RustHttpConfig
 import mozilla.components.support.rustlog.RustLog
 import mozilla.components.support.webextensions.WebExtensionSupport
+import org.mozilla.reference.browser.ext.components
 import org.mozilla.reference.browser.ext.isCrashReportActive
 import org.mozilla.reference.browser.push.PushFxaIntegration
 import org.mozilla.reference.browser.push.WebPushEngineIntegration
@@ -29,7 +32,7 @@ open class BrowserApplication : Application() {
         setupCrashReporting(this)
 
         RustHttpConfig.setClient(lazy { components.core.client })
-        setupLogging()
+        setupLogging(components.utils.logStorage)
 
         if (!isMainProcess()) {
             // If this is not the main process then do not continue with the initialization here. Everything that
@@ -93,9 +96,12 @@ open class BrowserApplication : Application() {
     }
 }
 
-private fun setupLogging() {
+private fun setupLogging(logStorage: StorageLogSink) {
     // We want the log messages of all builds to go to Android logcat
     Log.addSink(AndroidLogSink())
+    // We want to record log messages so that we can view them in-app and export them.
+    Log.addSink(logStorage)
+    // We want to enable logging in our Rust dependencies (places, logins, fxaclient, etc).
     RustLog.enable()
 }
 
